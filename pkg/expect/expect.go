@@ -123,6 +123,8 @@ func lex(in []byte) (cmds []Cmd, err error) {
         cmds = append(cmds, cmd)
         cmd = Cmd{Level: lvl, Index: len(cmds) + 1}
         accumulator = ""
+      case len(run) < 1:
+          return nil, errors.New("Invalid expression")
       case run[0] == run[len(run)-1] && run[0] == []byte("\"")[0]:
         if len(run)-1 < 1 {
           return nil, errors.New("Invalid expression")
