@@ -1874,12 +1874,15 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-							if err := model.Association("Groups").Append(&appendGroups); err != nil {
+
+							groups := tx.Model(user).Association("Groups")
+
+							if err := groups.Append(&appendGroups); err != nil {
 								tx.Rollback()
 								return err
 							}
 							if len(deleteGroups) > 0 {
-								if err := model.Association("Groups").Delete(deleteGroups); err != nil {
+								if err := groups.Delete(deleteGroups); err != nil {
 									tx.Rollback()
 									return err
 								}
@@ -1894,12 +1897,15 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-							if err := model.Association("Roles").Append(&appendRoles); err != nil {
+
+							roles := tx.Model(user).Association("Roles")
+
+							if err := roles.Append(&appendRoles); err != nil {
 								tx.Rollback()
 								return err
 							}
 							if len(deleteRoles) > 0 {
-								if err := model.Association("Roles").Delete(deleteRoles); err != nil {
+								if err := roles.Delete(deleteRoles); err != nil {
 									tx.Rollback()
 									return err
 								}
