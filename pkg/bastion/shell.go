@@ -1681,6 +1681,59 @@ GLOBAL OPTIONS:
 						return enc.Encode(users)
 					},
 				}, {
+					Name:      "kick",
+					Usage:     "Kills all active sessions for user(s)",
+					ArgsUsage: "USER...",
+					Action: func(c *cli.Context) error {
+						if c.NArg() < 1 {
+							return cli.ShowSubcommandHelp(c)
+						}
+
+						if err := myself.CheckRoles([]string{"admin"}); err != nil {
+							return err
+						}
+						
+						var users []*dbmodels.User
+						if err := dbmodels.UsersByIdentifiers(db, c.Args()).Find(&users).Error; err != nil {
+							return err
+						}
+						
+						for _, user := range users {
+							if err := db.Model(&dbmodels.Session{}).Where(&dbmodels.Session{User: user, Status: string(dbmodels.SessionStatusActive)}).Update("status", "closed").Error; err != nil {
+								return err
+							}
+						}
+						return nil
+					},
+				}, {
+					Name:      "ban",
+					Usage:     "Kills all active sessions for user(s), and wipes all his ssh keys",
+					ArgsUsage: "USER...",
+					Action: func(c *cli.Context) error {
+						if c.NArg() < 1 {
+							return cli.ShowSubcommandHelp(c)
+						}
+
+						if err := myself.CheckRoles([]string{"admin"}); err != nil {
+							return err
+						}
+						
+						var users []*dbmodels.User
+						if err := dbmodels.UsersByIdentifiers(db, c.Args()).Find(&users).Error; err != nil {
+							return err
+						}
+						
+						for _, user := range users {
+							if err := db.Where("user_id = ?", user.ID).Delete(&dbmodels.UserKey{}).Error; err != nil {
+								return err
+							}
+							if err := db.Model(&dbmodels.Session{}).Where(&dbmodels.Session{User: user, Status: string(dbmodels.SessionStatusActive)}).Update("status", "closed").Error; err != nil {
+								return err
+							}
+						}
+						return nil
+					},
+				}, {
 					Name:        "invite",
 					ArgsUsage:   "<email>",
 					Usage:       "Invites a new user",
