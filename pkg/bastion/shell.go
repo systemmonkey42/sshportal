@@ -1836,9 +1836,9 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-
+							
 							groups := tx.Model(user).Association("Groups")
-
+							
 							if err := groups.Append(&appendGroups); err != nil {
 								tx.Rollback()
 								return err
