@@ -1862,7 +1862,7 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-
+							
 							roles := tx.Model(user).Association("Roles")
 
 							if err := roles.Append(&appendRoles); err != nil {
