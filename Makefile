@@ -5,6 +5,8 @@ DOCKER_IMAGE ?= moul/sshportal
 VERSION ?= `git describe --tags --always`
 VCS_REF ?= `git rev-parse --short HEAD`
 GO_INSTALL_OPTS = -ldflags="-X main.GitSha=$(VCS_REF) -X main.GitTag=$(VERSION)"
+LDFLAGS = -w -s
+GO_BUILD_OPTS = -ldflags="-X main.GitSha=$(VCS_REF) -X main.GitTag=$(VERSION) -extldflags '-static' $(LDFLAGS)"
 PORT ?= 2222
 
 include rules.mk
@@ -18,7 +20,7 @@ integration:
 
 .PHONY: _docker_install
 _docker_install:
-	CGO_ENABLED=1 $(GO) build -ldflags '-extldflags "-static" $(LDFLAGS)' -tags netgo -v -o /go/bin/sshportal
+	CGO_ENABLED=1 $(GO) build $(GO_BUILD_OPTS) -tags netgo -v -o /go/bin/sshportal
 
 .PHONY: dev
 dev:
