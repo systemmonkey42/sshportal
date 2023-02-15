@@ -272,23 +272,24 @@ func ShellHandler(s ssh.Session, version, gitSha, gitTag string) {
 }
 
 func PasswordAuthHandler(db *gorm.DB, logsLocation, aclCheckCmd, aesKey, dbDriver, dbURL, bindAddr string, demo bool) ssh.PasswordHandler {
-	return func(ctx ssh.Context, pass string) bool {
-		actx := &authContext{
-			db:            db,
-			inputUsername: ctx.User(),
-			logsLocation:  logsLocation,
-			aclCheckCmd:   aclCheckCmd,
-			aesKey:        aesKey,
-			dbDriver:      dbDriver,
-			dbURL:         dbURL,
-			bindAddr:      bindAddr,
-			demo:          demo,
-			authMethod:    "password",
-		}
-		actx.authSuccess = actx.userType() == userTypeHealthcheck
-		ctx.SetValue(authContextKey, actx)
-		return actx.authSuccess
-	}
+	return nil
+	//return func(ctx ssh.Context, pass string) bool {
+	//	actx := &authContext{
+	//		db:            db,
+	//		inputUsername: ctx.User(),
+	//		logsLocation:  logsLocation,
+	//		aclCheckCmd:   aclCheckCmd,
+	//		aesKey:        aesKey,
+	//		dbDriver:      dbDriver,
+	//		dbURL:         dbURL,
+	//		bindAddr:      bindAddr,
+	//		demo:          demo,
+	//		authMethod:    "password",
+	//	}
+	//	actx.authSuccess = actx.userType() == userTypeHealthcheck
+	//	ctx.SetValue(authContextKey, actx)
+	//	return actx.authSuccess
+	//}
 }
 
 func PrivateKeyFromDB(db *gorm.DB, aesKey string) func(*ssh.Server) error {
