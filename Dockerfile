@@ -13,4 +13,4 @@ COPY            --from=builder /go/bin/sshportal /bin/sshportal
 ENTRYPOINT      ["/bin/sshportal"]
 CMD             ["server"]
 EXPOSE          2222
-HEALTHCHECK     CMD /bin/sshportal healthcheck --wait
+#HEALTHCHECK     CMD /bin/sshportal healthcheck --wait # - healthcheck doesn't work with passwords disabled
