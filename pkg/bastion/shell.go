@@ -1880,10 +1880,6 @@ GLOBAL OPTIONS:
 							return err
 						}
 
-						if c.Bool("set-admin") && c.Bool("unset-admin") {
-							return fmt.Errorf("cannot use --set-admin and --unset-admin altogether")
-						}
-
 						if len(users) > 1 && c.String("email") != "" {
 							return fmt.Errorf("cannot set --email when editing multiple users at once")
 						}
