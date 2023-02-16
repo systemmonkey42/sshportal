@@ -777,7 +777,7 @@ GLOBAL OPTIONS:
 							host.Name = c.String("name")
 						}
 
-						host.Logging = "everything" // default is everything
+						host.Logging = "disabled" // default is no logging
 						if c.String("logging") != "" {
 							host.Logging = c.String("logging")
 						}
