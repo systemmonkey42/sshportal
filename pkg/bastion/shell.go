@@ -1828,9 +1828,11 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-							if err := model.Association("Roles").Append(&appendRoles); err != nil {
-								tx.Rollback()
-								return err
+							if len(appendRoles) > 0 {
+								if err := model.Association("Roles").Append(&appendRoles); err != nil {
+									tx.Rollback()
+									return err
+								}
 							}
 							if len(deleteRoles) > 0 {
 								if err := model.Association("Roles").Delete(deleteRoles); err != nil {
