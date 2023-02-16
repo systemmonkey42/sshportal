@@ -1955,12 +1955,11 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-							
-							roles := tx.Model(user).Association("Roles")
-
-							if err := roles.Append(&appendRoles); err != nil {
-								tx.Rollback()
-								return err
+							if len(appendRoles) > 0 {
+								if err := model.Association("Roles").Append(&appendRoles); err != nil {
+									tx.Rollback()
+									return err
+								}
 							}
 							if len(deleteRoles) > 0 {
 								if err := roles.Delete(deleteRoles); err != nil {
