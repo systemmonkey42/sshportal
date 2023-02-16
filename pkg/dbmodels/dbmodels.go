@@ -293,30 +293,55 @@ func HostsByIdentifiers(db *gorm.DB, identifiers []string) *gorm.DB {
 }
 func HostByName(db *gorm.DB, name string) (*Host, error) {
 	var host Host
+
+	// Default user, same as elsewhere
+	user := "root"
+
+	// Split name into "user" and "host" parts.
+	if parts := strings.Split(name, `%`); len(parts) == 2 {
+		name = parts[1]
+		user = parts[0]
+	}
+
+	// Retrieve host with an exact name match.  Exclude hosts containing '/' for safety
 	db.Preload("SSHKey").Where("name = ? AND name NOT LIKE '%/%'", name).Find(&host)
+
+	// If a match was found, patch the URL (if it contains a wildcard username)
+	if host.Name != "" {
+		if strings.Contains(host.URL, `%`) {
+			host.URL = strings.Replace(host.URL, "%", user, -1)
+		}
+		return &host, nil
+	}
+
+	// If a match was not found, try a subnet formatted match
 	if host.Name == "" {
+		// Resolve the name.  Ensures a hostname is resolved to an IP address before matching.
 		// FIXME: add available hosts
 		ips, err := net.LookupIP(name)
 		if err != nil {
 			return nil, err
 		}
+		// Get list of all available subnets.
 		var subnetHosts []*Host
 		db.Preload("SSHKey").Where("name LIKE '%/%'", name).Find(&subnetHosts)
 		for _, subnet := range subnetHosts {
 			_, ipnet, err := net.ParseCIDR(subnet.Name)
-			if err != nil {
-				return nil, err
-			}
-			for _, ip := range ips {
-				if ipnet.Contains(ip) {
-					subnet.URL = strings.Replace(subnet.URL, "*", ip.String(), -1)
-					return subnet, nil
+			if err == nil {
+				for _, ip := range ips {
+					if ipnet.Contains(ip) {
+						subnet.URL = strings.Replace(subnet.URL, "%", user, -1)
+						subnet.URL = strings.Replace(subnet.URL, "*", ip.String(), -1)
+						log.Printf("Subnet match: %q -> %q\n", name, subnet.URL)
+						return subnet, nil
+					}
 				}
+			} else {
+				log.Printf("WARNING: Failed to parse %q: %s\n", subnet.Name, err.Error())
 			}
 		}
-		return nil, fmt.Errorf("no such target: %q", name)
 	}
-	return &host, nil
+	return nil, fmt.Errorf("no such target: %q", name)
 }
 
 func (host *Host) ClientConfig(hk gossh.HostKeyCallback) (*gossh.ClientConfig, error) {
