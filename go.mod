@@ -2,25 +2,30 @@ module moul.io/sshportal
 
 require (
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
-	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
-	github.com/docker/docker v27.5.1+incompatible
-	github.com/dustin/go-humanize v1.0.1
-	github.com/gliderlabs/ssh v0.3.8
-	github.com/go-gormigrate/gormigrate/v2 v2.1.3
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
+	github.com/creack/pty v1.1.11 // indirect
+	github.com/docker/docker v20.10.12+incompatible
+	github.com/dustin/go-humanize v1.0.0
+	github.com/gliderlabs/ssh v0.3.6-0.20230316001703-cf1ec7e0ccfb
+	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/kr/pty v1.1.8
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/reiver/go-oi v1.0.0
 	github.com/reiver/go-telnet v0.0.0-20180421082511-9ff0b2ab096e
-	github.com/smartystreets/goconvey v1.8.1
-	github.com/urfave/cli v1.22.16
-	golang.org/x/crypto v0.32.0
-	golang.org/x/tools v0.29.0
-	gorm.io/driver/mysql v1.5.7
-	gorm.io/driver/postgres v1.5.11
-	gorm.io/driver/sqlite v1.5.7
-	gorm.io/gorm v1.25.12
+	github.com/sabban/bastion v0.0.0-20180110125408-b9d3c9b1f4d3
+	github.com/smartystreets/goconvey v1.7.2
+	github.com/tailscale/depaware v0.0.0-20210622194025-720c4b409502
+	github.com/urfave/cli v1.22.5
+	golang.org/x/crypto v0.9.0
+	golang.org/x/tools v0.6.0
+	gorm.io/driver/mysql v1.2.3
+	gorm.io/driver/postgres v1.2.3
+	gorm.io/driver/sqlite v1.2.6
+	gorm.io/gorm v1.22.5
+	moul.io/srand v1.6.1
 )
 
 require (
