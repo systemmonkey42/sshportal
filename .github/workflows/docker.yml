@@ -3,6 +3,8 @@ on:
   push:
     tags:
       - '*'
+  schedule:
+    - cron: "0 0 * * *"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
