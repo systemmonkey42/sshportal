@@ -8,7 +8,7 @@
 Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 
 ## IMPORTANT NOTE
-**The [initial project](https://github.com/moul/sshportal) is no longer unmaintained. This fork includes some bugfixes and features but the project is on maintenance mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead**
+**The [original project](https://github.com/moul/sshportal) is no longer being maintained. This fork includes some bugfixes and features but it is on MAINTENANCE mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead.**
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/libvoid/sshportal/master/.assets/bastion.jpg" width="45%">
@@ -49,7 +49,7 @@ An [automated build is setup on the Github registry](https://github.com/libvoid/
 ```console
 # Start a server in background
 #   mount `pwd` to persist the sqlite database file
-docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" libvoid/sshportal:v1.20.1
+docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/libvoid/sshportal:latest
 
 # check logs (mandatory on first run to get the administrator invite token)
 docker logs -f sshportal
@@ -66,7 +66,7 @@ docker rename sshportal sshportal_old
 cp sshportal.db sshportal.db.bkp
 
 # run the new version
-docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" libvoid/sshportal:v1.20.1
+docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/libvoid/sshportal:latest
 # check the logs for migration or cross-version incompatibility errors
 docker logs -f sshportal
 ```
