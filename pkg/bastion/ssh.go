@@ -169,7 +169,7 @@ func ChannelHandler(srv *ssh.Server, conn *gossh.ServerConn, newChan gossh.NewCh
 				_ = ch.Close()
 				return
 			}
-			go func(cnx *gossh.ServerConn, dbConn *gorm.DB, sessionID uint) {
+			go func(_ *gossh.ServerConn, dbConn *gorm.DB, sessionID uint) {
 				for {
 					sess := dbmodels.Session{Model: gorm.Model{ID: sessionID}, Status: string(dbmodels.SessionStatusActive)}
 					if err := dbConn.First(&sess).Error; err != nil || sess.Status != string(dbmodels.SessionStatusActive) {
@@ -222,7 +222,7 @@ func bastionClientConfig(ctx ssh.Context, host *dbmodels.Host) (*gossh.ClientCon
 
 	crypto.HostDecrypt(actx.aesKey, host)
 	if host.SSHKey != nil {
-	  crypto.SSHKeyDecrypt(actx.aesKey, host.SSHKey)
+		crypto.SSHKeyDecrypt(actx.aesKey, host.SSHKey)
 	}
 
 	clientConfig, err := host.ClientConfig(dynamicHostKey(actx.db, host))

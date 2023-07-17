@@ -1632,12 +1632,12 @@ GLOBAL OPTIONS:
 						if err := myself.CheckRoles([]string{"admin"}); err != nil {
 							return err
 						}
-						
+
 						var users []*dbmodels.User
 						if err := dbmodels.UsersByIdentifiers(db, c.Args()).Find(&users).Error; err != nil {
 							return err
 						}
-						
+
 						for _, user := range users {
 							if err := db.Model(&dbmodels.Session{}).Where(&dbmodels.Session{User: user, Status: string(dbmodels.SessionStatusActive)}).Update("status", "closed").Error; err != nil {
 								return err
@@ -1657,12 +1657,12 @@ GLOBAL OPTIONS:
 						if err := myself.CheckRoles([]string{"admin"}); err != nil {
 							return err
 						}
-						
+
 						var users []*dbmodels.User
 						if err := dbmodels.UsersByIdentifiers(db, c.Args()).Find(&users).Error; err != nil {
 							return err
 						}
-						
+
 						for _, user := range users {
 							if err := db.Where("user_id = ?", user.ID).Delete(&dbmodels.UserKey{}).Error; err != nil {
 								return err

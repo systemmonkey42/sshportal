@@ -3,7 +3,6 @@ package bastion // import "moul.io/sshportal/pkg/bastion"
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -129,7 +128,7 @@ func pipe(lreqs, rreqs <-chan *gossh.Request, lch, rch gossh.Channel, sessConfig
 	quit := make(chan string, 1)
 	channeltype := newChan.ChannelType()
 
-	var logWriter io.WriteCloser = newDiscardWriteCloser()
+	var logWriter = newDiscardWriteCloser()
 	if sessConfig.LoggingMode != "disabled" {
 		filename := filepath.Join(sessConfig.LogsLocation, fmt.Sprintf("%s-%s-%s-%d-%s", user, username, channeltype, sessionID, time.Now().Format(time.RFC3339)))
 		f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0440)
@@ -253,7 +252,7 @@ func pipe(lreqs, rreqs <-chan *gossh.Request, lch, rch gossh.Channel, sessConfig
 	}
 }
 
-func newDiscardWriteCloser() io.WriteCloser { return &discardWriteCloser{ioutil.Discard} }
+func newDiscardWriteCloser() io.WriteCloser { return &discardWriteCloser{io.Discard} }
 
 type discardWriteCloser struct {
 	io.Writer
