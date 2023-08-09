@@ -1,0 +1,48 @@
+name: Auto release trigger
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 2 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    outputs:
+      do_release: ${{ steps.release.outputs.RELEASE }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Force update latest tag if there is changes
+        id: release
+        run: |
+          echo "RELEASE=false" >> $GITHUB_OUTPUT
+          git diff $(git describe --tags --abbrev=0) HEAD --stat | grep -q "changed" || exit 0
+          new_tag=$(git describe --tags --abbrev=0 | awk -F. '{OFS="."; $NF+=1; print $0}')
+          git tag "$new_tag" -f
+          git push -f origin tag "$new_tag"
+          echo "RELEASE=true" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  goreleaser:
+    needs: auto-release
+    if: needs.auto-release.outputs.do_release == 'true'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
