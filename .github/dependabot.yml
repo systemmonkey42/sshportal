@@ -6,13 +6,13 @@ updates:
   directory: "/"
   schedule:
     interval: weekly
-    time: "04:00"
+    time: "02:00"
 
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: weekly
-    time: "04:00"
+    time: "02:00"
   commit-message:
     prefix: "chore(deps)"
   groups:
@@ -24,7 +24,7 @@ updates:
   directory: "/"
   schedule:
     interval: weekly
-    time: "04:00"
+    time: "02:00"
   commit-message:
     prefix: "chore(deps)"
   groups:
