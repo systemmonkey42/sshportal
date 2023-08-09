@@ -26,6 +26,4 @@ services:
     depends_on:
       - sshportal
       - testserver
-    #volumes:
-    #  - .:/integration
     tty: true
