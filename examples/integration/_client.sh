@@ -25,38 +25,38 @@ set -x
 ssh sshportal -l invite:integration
 
 # hostgroup/usergroup/acl
-ssh sshportal -l admin hostgroup create
-ssh sshportal -l admin hostgroup create --name=hg1
-ssh sshportal -l admin hostgroup create --name=hg2 --comment=test
-ssh sshportal -l admin hostgroup inspect hg1 hg2
-ssh sshportal -l admin hostgroup ls
+ssh sshportal -l root hostgroup create
+ssh sshportal -l root hostgroup create --name=hg1
+ssh sshportal -l root hostgroup create --name=hg2 --comment=test
+ssh sshportal -l root hostgroup inspect hg1 hg2
+ssh sshportal -l root hostgroup ls
 
-ssh sshportal -l admin usergroup create
-ssh sshportal -l admin usergroup create --name=ug1
-ssh sshportal -l admin usergroup create --name=ug2 --comment=test
-ssh sshportal -l admin usergroup inspect ug1 ug2
-ssh sshportal -l admin usergroup ls
+ssh sshportal -l root usergroup create
+ssh sshportal -l root usergroup create --name=ug1
+ssh sshportal -l root usergroup create --name=ug2 --comment=test
+ssh sshportal -l root usergroup inspect ug1 ug2
+ssh sshportal -l root usergroup ls
 
-ssh sshportal -l admin acl create --ug=ug1 --ug=ug2 --hg=hg1 --hg=hg2 --comment=test --action=allow --weight=42
-ssh sshportal -l admin acl inspect 2
-ssh sshportal -l admin acl ls
+ssh sshportal -l root acl create --ug=ug1 --ug=ug2 --hg=hg1 --hg=hg2 --comment=test --action=allow --weight=42
+ssh sshportal -l root acl inspect 2
+ssh sshportal -l root acl ls
 
 # basic host create
-ssh sshportal -l admin host create bob@example.org:1234
-ssh sshportal -l admin host create test42
-ssh sshportal -l admin host create --name=testtest --comment=test --password=test test@test.test
-ssh sshportal -l admin host create --group=hg1 --group=hg2 hostwithgroups.org
-ssh sshportal -l admin host inspect example test42 testtest hostwithgroups
-ssh sshportal -l admin host update --assign-group=hg1 test42
-ssh sshportal -l admin host update --unassign-group=hg1 test42
-ssh sshportal -l admin host update --assign-group=hg1 test42
-ssh sshportal -l admin host update --assign-group=hg2 --unassign-group=hg2 test42
-ssh sshportal -l admin host ls
+ssh sshportal -l root host create bob@example.org:1234
+ssh sshportal -l root host create test42
+ssh sshportal -l root host create --name=testtest --comment=test --password=test test@test.test
+ssh sshportal -l root host create --group=hg1 --group=hg2 hostwithgroups.org
+ssh sshportal -l root host inspect example test42 testtest hostwithgroups
+ssh sshportal -l root host update --assign-group=hg1 test42
+ssh sshportal -l root host update --unassign-group=hg1 test42
+ssh sshportal -l root host update --assign-group=hg1 test42
+ssh sshportal -l root host update --assign-group=hg2 --unassign-group=hg2 test42
+ssh sshportal -l root host ls
 
 # backup/restore
-ssh sshportal -l admin config backup --indent --ignore-events > backup-1
-ssh sshportal -l admin config restore --confirm < backup-1
-ssh sshportal -l admin config backup --indent --ignore-events  > backup-2
+ssh sshportal -l root config backup --indent --ignore-events > backup-1
+ssh sshportal -l root config restore --confirm < backup-1
+ssh sshportal -l root config backup --indent --ignore-events  > backup-2
 (
     cat backup-1 | grep -v '"date":' | grep -v 'tedAt":' > backup-1.clean
     cat backup-2 | grep -v '"date":' | grep -v 'tedAt":' > backup-2.clean
@@ -68,7 +68,7 @@ ssh sshportal -l admin config backup --indent --ignore-events  > backup-2
 echo "Strage behavior with cross-container communication on Github CI, skipping some tests..."
 # else
 #     # bastion
-#     ssh sshportal -l admin host create --name=testserver toto@testserver:2222
+#     ssh sshportal -l root host create --name=testserver toto@testserver:2222
 #     out="$(ssh sshportal -l testserver echo hello | head -n 1)"
 #     test "$out" = '{"User":"toto","Environ":null,"Command":["echo","hello"]}'
 

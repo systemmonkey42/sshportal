@@ -49,7 +49,7 @@ An [automated build is setup on the Github registry](https://github.com/libvoid/
 ```console
 # Start a server in background
 #   mount `pwd` to persist the sqlite database file
-docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/libvoid/sshportal:latest
+docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/alterway/sshportal:latest
 
 # check logs (mandatory on first run to get the administrator invite token)
 docker logs -f sshportal
@@ -66,7 +66,7 @@ docker rename sshportal sshportal_old
 cp sshportal.db sshportal.db.bkp
 
 # run the new version
-docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/libvoid/sshportal:latest
+docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/alterway/sshportal:latest
 # check the logs for migration or cross-version incompatibility errors
 docker logs -f sshportal
 ```
@@ -95,27 +95,27 @@ Start the server
 
 ```console
 $ sshportal server
-2017/11/13 10:58:35 Admin user created, use the user 'invite:BpLnfgDsc2WD8F2q' to associate a public key with this account
-2017/11/13 10:58:35 SSH Server accepting connections on :2222
+2023/08/09 16:20:52 info: 'root' user created. Run 'ssh localhost -p 2222 -l invite:JBU86sSiJTVgcJwZ' to associate your public key with this account
+2023/08/09 16:20:52 info: SSH Server accepting connections on :2222, idle-timout=0s
 ```
 
 Link your SSH key with the admin account
 
 ```console
-$ ssh localhost -p 2222 -l invite:BpLnfgDsc2WD8F2q
-Welcome admin!
+$ ssh localhost -p 2222 -l invite:JBU86sSiJTVgcJwZ
+Welcome root!
 
-Your key is now associated with the user "admin@sshportal".
+Your key is now associated with the user "root@localhost".
 Shared connection to localhost closed.
 $
 ```
 
-If the association fails and you are prompted for a password, verify that the host you're connecting from has a SSH key set up or generate one with ```ssh-keygen -t rsa```
+If the association fails and you are prompted for a password, verify that the host you're connecting from has a SSH key set up or generate one with ```ssh-keygen -t ed25519 -c $USER@localhost```
 
 Drop an interactive administrator shell
 
 ```console
-ssh localhost -p 2222 -l admin
+ssh root@localhost -p 2222
 
 
     __________ _____           __       __
@@ -149,7 +149,7 @@ config>
 Add the key to the server
 
 ```console
-ssh bart@foo.example.org "$(ssh localhost -p 2222 -l admin key setup default)"
+ssh bart@foo.example.org "$(ssh localhost -p 2222 -l root key setup default)"
 ```
 
 Profit
@@ -176,7 +176,7 @@ Demo gif:
 
 ## Features and limitations
 
-* Single autonomous binary (~10-20Mb) with no runtime dependencies (embeds ssh server and client)
+* Single autonomous binary (~20Mb) with no runtime dependencies (except glibc)
 * Portable / Cross-platform (regularly tested on linux and OSX/darwin)
 * Store data in [Sqlite3](https://www.sqlite.org/) or [MySQL](https://www.mysql.com) (probably easy to add postgres, mssql thanks to gorm)
 * Stateless -> horizontally scalable when using [MySQL](https://www.mysql.com) as the backend
@@ -249,15 +249,15 @@ cp sshportal.db sshportal.db.bkp
 
 `sshportal` embeds a configuration CLI.
 
-By default, the configuration user is `admin`, (can be changed using `--config-user=<value>` when starting the server. The shell is also accessible through `ssh [username]@portal.example.org`.
+By default, the configuration user is the user starting the server for the first time. It fallbacks to `root`.
 
-Each command can be run directly by using this syntax: `ssh admin@portal.example.org <command> [args]`:
+Each command can be run directly by using this syntax: `ssh root@portal.example.org <command> [args]`:
 
 ```
-ssh admin@portal.example.org host inspect toto
+ssh root@portal.example.org host inspect toto
 ```
 
-You can enter in interactive mode using this syntax: `ssh admin@portal.example.org`
+You can enter in interactive mode using this syntax: `ssh root@portal.example.org`
 
 ![sshportal overview](https://raw.github.com/libvoid/sshportal/master/.assets/overview.png)
 ---
@@ -366,7 +366,7 @@ $ sshportal healthcheck --addr=localhost:2222; echo $?
 Wait for sshportal to be healthy, then connect
 
 ```console
-$ sshportal healthcheck --wait && ssh sshportal -l admin
+$ sshportal healthcheck --wait && ssh sshportal -l root
 config>
 ```
 
@@ -378,7 +378,7 @@ Edit your `~/.ssh/config` file (create it first if needed)
 
 ```ini
 Host portal
-  User      admin
+  User      root
   Port      2222       # portal port
   HostName  127.0.0.1  # portal hostname
 ```
@@ -387,7 +387,7 @@ Host portal
 # you can now run a shell using this:
 ssh portal
 # instead of this:
-ssh localhost -p 2222 -l admin
+ssh localhost -p 2222 -l root
 
 # or connect to hosts using this:
 ssh hostname@portal

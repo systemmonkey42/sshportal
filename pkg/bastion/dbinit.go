@@ -638,7 +638,7 @@ func DBInit(db *gorm.DB) error {
 		}
 		username = strings.ToLower(username)
 		if username == "" {
-			username = "admin" // fallback username
+			username = "root" // fallback username
 		}
 		user := dbmodels.User{
 			Name:        username,
@@ -651,7 +651,7 @@ func DBInit(db *gorm.DB) error {
 		if err := db.Create(&user).Error; err != nil {
 			return err
 		}
-		log.Printf("info 'admin' user created, use the user 'invite:%s' to associate a public key with this account", user.InviteToken)
+		log.Printf("info: '%s' user created. Run 'ssh localhost -p 2222 -l invite:%s' to associate your public key with this account", user.Name, user.InviteToken)
 	}
 
 	// create host ssh key
