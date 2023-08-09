@@ -1,20 +1,33 @@
 version: 2
+
 updates:
+
 - package-ecosystem: docker
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
     time: "04:00"
-  open-pull-requests-limit: 10
+
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
     time: "04:00"
-  open-pull-requests-limit: 10
+  commit-message:
+    prefix: "chore(deps)"
+  groups:
+    gh-actions:
+      patterns:
+        - "*"
+
 - package-ecosystem: gomod
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
     time: "04:00"
-  open-pull-requests-limit: 10
+  commit-message:
+    prefix: "chore(deps)"
+  groups:
+    go-deps:
+      patterns:
+        - "*"
