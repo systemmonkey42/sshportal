@@ -1527,7 +1527,9 @@ GLOBAL OPTIONS:
 							return cli.ShowSubcommandHelp(c)
 						}
 
-						// not checking roles, everyone with an account can see how to enroll new hosts
+						if err := myself.CheckRoles([]string{"admin"}); err != nil {
+							return err
+						}
 
 						var key dbmodels.SSHKey
 						if err := dbmodels.SSHKeysByIdentifiers(dbmodels.SSHKeysPreload(db), c.Args()).First(&key).Error; err != nil {
@@ -1565,7 +1567,6 @@ GLOBAL OPTIONS:
 								name: "Crypto",
 								lines: []line{
 									{"authorized_key format", key.PubKey},
-									{"Private Key", key.PrivKey},
 								},
 							}, {
 								name: "Help",
