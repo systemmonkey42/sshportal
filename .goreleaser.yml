@@ -17,3 +17,30 @@ changelog:
     - '^test:'
     - '^style:'
     - '^ci:'
+
+nfpms:
+- file_name_template: "{{ .ConventionalFileName }}"
+  vendor: Alterway
+  maintainer: security@alterway.fr
+  license: Apache 2.0
+
+  formats:
+    - deb
+    - rpm
+
+  dependencies:
+    - systemd
+
+  provides:
+    - sshportal
+
+  bindir: /usr/bin
+
+  contents:
+    - src: packaging/etc/
+      dst: /etc/
+      type: tree
+
+  scripts:
+    postinstall: "packaging/postinstall.sh"
+    postremove: "packaging/postremove.sh"

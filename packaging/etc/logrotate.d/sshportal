@@ -1,0 +1,13 @@
+/var/log/sshportal/audit.log {
+  daily
+  missingok
+  rotate 365
+  compress
+  notifempty
+  create 640 root root
+  dateext
+  dateformat -%Y-%m-%d
+  postrotate
+    invoke-rc.d rsyslog rotate > /dev/null
+  endscript
+}

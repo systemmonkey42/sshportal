@@ -1,21 +1,19 @@
 # sshportal
 
 [![Go Report Card](https://goreportcard.com/badge/moul.io/sshportal)](https://goreportcard.com/report/moul.io/sshportal)
-[![GoDoc](https://godoc.org/moul.io/sshportal?status.svg)](https://godoc.org/moul.io/sshportal)
-[![License](https://img.shields.io/github/license/moul/sshportal.svg)](https://github.com/libvoid/sshportal/blob/master/LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/libvoid/sshportal.svg)](https://github.com/libvoid/sshportal/releases)
+[![License](https://img.shields.io/github/license/alterway/sshportal.svg)](https://github.com/alterway/sshportal/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/alterway/sshportal.svg)](https://github.com/alterway/sshportal/releases)
 
 Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 
 ## IMPORTANT NOTE
-**The [original project](https://github.com/moul/sshportal) is no longer being maintained. This fork includes some bugfixes and features but it is on MAINTENANCE mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead.**
+**The [original project](https://github.com/moul/sshportal) is no longer being maintained. This fork includes important security fixes, some bugfixes and features but it is on MAINTENANCE mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead.**
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/libvoid/sshportal/master/.assets/bastion.jpg" width="45%">
+  <img src="https://raw.githubusercontent.com/alterway/sshportal/master/.assets/bastion.jpg" width="45%">
 </p>
 
-
-![Flow Diagram](https://raw.githubusercontent.com/libvoid/sshportal/master/.assets/flow-diagram.png)
+![Flow Diagram](https://raw.githubusercontent.com/alterway/sshportal/master/.assets/flow-diagram.png)
 
 ---
 
@@ -40,92 +38,55 @@ Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 
 ## Installation and usage
 
+Packaged installation is privileged as it comes with a hardened systemd service config.
+
+### Debian-based distributions
+
+1) Get the latest version from https://github.com/alterway/sshportal/releases
+
+```bash
+apt install ./sshportal.deb
+```
+
+This will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a dedicated cron for session logs. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
+
+
+2) Get the invite token
+
+```bash
+cat /var/log/sshportal/audit/audit.log
+```
+
+3) Make sure you have a ssh key pair and associate your public key to the bastion
+
+```bash
+ssh localhost -p 2222 -l invite:xxxxxxx
+
+Welcome sshportal!
+
+Your key is now associated with the user "sshportal@localhost".
+```
+
+4) Your first user is the admin. To access to the console, connect like a normal server
+
+```bash
+ssh sshportal@localhost -p 2222
+```
+
 ### Docker
 
-Docker is the recommended way to run sshportal.
+An [automated build is setup on the Github registry](https://github.com/alterway/sshportal/pkgs/container/sshportal).
 
-An [automated build is setup on the Github registry](https://github.com/libvoid/sshportal/pkgs/container/sshportal).
-
-```console
+```bash
 # Start a server in background
-#   mount `pwd` to persist the sqlite database file
+# mount `pwd` to persist the sqlite database file
 docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/alterway/sshportal:latest
 
 # check logs (mandatory on first run to get the administrator invite token)
 docker logs -f sshportal
 ```
 
-The easier way to upgrade sshportal is to do the following:
-
-```sh
-# we consider you were using an old version and you want to use the new version v1.10.0
-
-# stop and rename the last working container + backup the database
-docker stop sshportal
-docker rename sshportal sshportal_old
-cp sshportal.db sshportal.db.bkp
-
-# run the new version
-docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.io/alterway/sshportal:latest
-# check the logs for migration or cross-version incompatibility errors
-docker logs -f sshportal
-```
-
-Now you can test ssh-ing to sshportal to check if everything looks OK.
-
-In case of problem, you can rollback to the latest working version with the latest working backup, using:
-
-```sh
-docker stop sshportal
-docker rm sshportal
-cp sshportal.db.bkp sshportal.db
-docker rename sshportal_old sshportal
-docker start sshportal
-docker logs -f sshportal
-```
-
----
-
-### Manual Install
-
-Get the latest version from https://github.com/libvoid/sshportal/releases
-
-
-Start the server
-
-```console
-$ sshportal server
-2023/08/09 16:20:52 info: 'root' user created. Run 'ssh localhost -p 2222 -l invite:JBU86sSiJTVgcJwZ' to associate your public key with this account
-2023/08/09 16:20:52 info: SSH Server accepting connections on :2222, idle-timout=0s
-```
-
-Link your SSH key with the admin account
-
-```console
-$ ssh localhost -p 2222 -l invite:JBU86sSiJTVgcJwZ
-Welcome root!
-
-Your key is now associated with the user "root@localhost".
-Shared connection to localhost closed.
-$
-```
-
-If the association fails and you are prompted for a password, verify that the host you're connecting from has a SSH key set up or generate one with ```ssh-keygen -t ed25519 -c $USER@localhost```
-
-Drop an interactive administrator shell
-
-```console
-ssh root@localhost -p 2222
-
-
-    __________ _____           __       __
-   / __/ __/ // / _ \___  ____/ /____ _/ /
-  _\ \_\ \/ _  / ___/ _ \/ __/ __/ _ '/ /
- /___/___/_//_/_/   \___/_/  \__/\_,_/_/
-
-
-config>
-```
+### Quick start
 
 Create your first host
 
@@ -146,10 +107,22 @@ Total: 1 hosts.
 config>
 ```
 
-Add the key to the server
+Add the `host` key to the server
 
 ```console
-ssh bart@foo.example.org "$(ssh localhost -p 2222 -l root key setup default)"
+config> host ls
+  ID | NAME | URL | KEY | GROUPS | UPDATED | CREATED | COMMENT | HOP | LOGGING
+-----+------+-----+-----+--------+---------+---------+---------+-----+----------
+Total: 0 hosts.
+config> key ls
+  ID |  NAME   |  TYPE   | LENGTH | HOSTS |   UPDATED    |   CREATED    |       COMMENT
+-----+---------+---------+--------+-------+--------------+--------------+-----------------------
+   2 | host    | ed25519 |      1 |     0 | 1 minute ago | 1 minute ago | created by sshportal
+   1 | default | ed25519 |      1 |     0 | 1 minute ago | 1 minute ago | created by sshportal
+```
+
+```console
+ssh bart@foo.example.org "$(ssh sshportal@localhost -p 2222 key setup host)"
 ```
 
 Profit
@@ -170,7 +143,7 @@ To associate this account with a key, use the following SSH user: 'invite:NfHK5a
 ```
 
 Demo gif:
-![sshportal demo](https://github.com/libvoid/sshportal/raw/master/.assets/demo.gif)
+![sshportal demo](https://github.com/alterway/sshportal/raw/master/.assets/demo.gif)
 
 ---
 
@@ -178,7 +151,7 @@ Demo gif:
 
 * Single autonomous binary (~20Mb) with no runtime dependencies (except glibc)
 * Portable / Cross-platform (regularly tested on linux and OSX/darwin)
-* Store data in [Sqlite3](https://www.sqlite.org/) or [MySQL](https://www.mysql.com) (probably easy to add postgres, mssql thanks to gorm)
+* Store data in [Sqlite3](https://www.sqlite.org/) or [MySQL](https://www.mysql.com)
 * Stateless -> horizontally scalable when using [MySQL](https://www.mysql.com) as the backend
 * Connect to remote host using key or password
 * Admin commands can be run directly or in an interactive shell
@@ -259,7 +232,7 @@ ssh root@portal.example.org host inspect toto
 
 You can enter in interactive mode using this syntax: `ssh root@portal.example.org`
 
-![sshportal overview](https://raw.github.com/libvoid/sshportal/master/.assets/overview.png)
+![sshportal overview](https://raw.github.com/alterway/sshportal/master/.assets/overview.png)
 ---
 
 ## Shell commands
@@ -372,13 +345,13 @@ config>
 
 ---
 
-## portal alias (.ssh/config)
+## Portal alias (.ssh/config)
 
 Edit your `~/.ssh/config` file (create it first if needed)
 
 ```ini
 Host portal
-  User      root
+  User      root       # or 'sshportal' if you use the packaged binary
   Port      2222       # portal port
   HostName  127.0.0.1  # portal hostname
 ```
@@ -405,16 +378,16 @@ By default, `sshportal` uses a local [sqlite](https://www.sqlite.org/) database 
 
 You can run multiple instances of `sshportal` sharing the same [MySQL](https://www.mysql.com) database, using `sshportal --db-conn=user:pass@host/dbname?parseTime=true --db-driver=mysql`.
 
-![sshportal cluster with MySQL backend](https://raw.github.com/libvoid/sshportal/master/.assets/cluster-mysql.png)
+![sshportal cluster with MySQL backend](https://raw.github.com/alterway/sshportal/master/.assets/cluster-mysql.png)
 
-See [examples/mysql](http://github.com/libvoid/sshportal/tree/master/examples/mysql).
+See [examples/mysql](http://github.com/alterway/sshportal/tree/master/examples/mysql).
 
 ---
 
 ## Under the hood
 
 * Docker first (used in dev, tests, by the CI and in production)
-* Backed by (see [dep graph](https://godoc.org/github.com/libvoid/sshportal?import-graph&hide=2)):
+* Backed by (see [dep graph](https://godoc.org/github.com/alterway/sshportal?import-graph&hide=2)):
   * SSH
     * https://github.com/gliderlabs/ssh: SSH server made easy (well-designed golang library to build SSH servers)
     * https://godoc.org/golang.org/x/crypto/ssh: both client and server SSH protocol and helpers
@@ -428,7 +401,7 @@ See [examples/mysql](http://github.com/libvoid/sshportal/tree/master/examples/my
     * https://github.com/mgutz/ansi: Terminal color helpers
     * https://github.com/urfave/cli: CLI flag parsing with subcommands support
 
-![sshportal data model](https://raw.github.com/libvoid/sshportal/master/.assets/sql-schema.png)
+![sshportal data model](https://raw.github.com/alterway/sshportal/master/.assets/sql-schema.png)
 
 ---
 
