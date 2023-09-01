@@ -1,13 +1,12 @@
-/var/log/sshportal/audit.log {
+/var/log/sshportal/audit/audit.log {
   daily
   missingok
   rotate 365
   compress
   notifempty
-  create 640 root root
   dateext
   dateformat -%Y-%m-%d
   postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
+    systemctl kill -s HUP rsyslog.service
   endscript
 }

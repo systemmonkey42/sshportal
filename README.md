@@ -1,3 +1,7 @@
+<div align="center">
+<img src="https://raw.githubusercontent.com/alterway/sshportal/master/.assets/bastion.jpg" width="20%">
+</div>
+
 # sshportal
 
 [![Go Report Card](https://goreportcard.com/badge/moul.io/sshportal)](https://goreportcard.com/report/moul.io/sshportal)
@@ -14,21 +18,28 @@ Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 </p>
 
 ![Flow Diagram](https://raw.githubusercontent.com/alterway/sshportal/master/.assets/flow-diagram.png)
+[![License](https://img.shields.io/github/license/alterway/sshportal.svg)](https://github.com/alterway/sshportal/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/alterway/sshportal.svg)](https://github.com/alterway/sshportal/releases)
+
+## IMPORTANT NOTE
+
+**The [original project](https://github.com/moul/sshportal) is no longer being maintained. This fork includes important security fixes, some bugfixes and features but it is on MAINTENANCE mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead.**
 
 ---
 
-## Contents
+![Flow Diagram](https://raw.githubusercontent.com/alterway/sshportal/master/.assets/flow-diagram.png)
+
+---
 
 <!-- toc -->
 
-- [Installation and usage](#installation-and-usage)
+- [Installation and usage](#installation)
+- [Quick Start](#quick-start)
 - [Features and limitations](#features-and-limitations)
 - [Backup / Restore](#backup--restore)
-- [built-in shell](#built-in-shell)
-- [Shell commands](#shell-commands)
+- [Built-in shell](#built-in-shell)
 - [Healthcheck](#healthcheck)
-- [portal alias (.ssh/config)](#portal-alias-sshconfig)
-- [Scaling](#scaling)
+- [Portal alias (.ssh/config)](#portal-alias-sshconfig)
 - [Under the hood](#under-the-hood)
 - [Testing](#testing)
 
@@ -36,7 +47,7 @@ Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 
 ---
 
-## Installation and usage
+### Installation
 
 Packaged installation is privileged as it comes with a hardened systemd service config.
 
@@ -48,7 +59,7 @@ Packaged installation is privileged as it comes with a hardened systemd service 
 apt install ./sshportal.deb
 ```
 
-This will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a dedicated cron for session logs. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
+This will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a systemd timer for purging session logs. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
 
 
 2) Get the invite token
@@ -77,6 +88,64 @@ ssh sshportal@localhost -p 2222
 
 An [automated build is setup on the Github registry](https://github.com/alterway/sshportal/pkgs/container/sshportal).
 
+Packaged installation (`.deb` & `.rpm`) is privileged as it comes with a hardened systemd service and a SELinux module if you have enfored SELinux on your GNU/Linux distribution.
+
+Get the latest version [here](https://github.com/alterway/sshportal/releases)
+
+**Note :** By default, your package manager will automatically install `sqlite` (recommended dependency)
+
+This installation will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a dedicated cron for session logs. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
+
+If mariadb is selected during the install, it will also automatically create the `sshportal` database if it doesn't exist.
+
+<details>
+<summary>Show Debian-based distributions instructions</summary>
+
+```bash
+apt install ./sshportal_x.x.x_xxx.deb
+```
+You will be asked if you want to use `mariadb` instead of `sqlite` (default). Make sure to install `mariadb-server` before as the package is not listed as a hard dependency in the [control file](https://github.com/alterway/sshportal/blob/debian/.goreleaser.yml#L31).
+
+To install SSHportal with mariadb:
+
+```bash
+apt install -y mariadb-server
+DEBIAN_FRONTEND=noninteractive SSHPORTAL_MARIADB_SETUP=true apt install --no-install-recommends -y ./sshportal_x.x.x_xxx.deb
+```
+
+If you want to stick with sqlite, you just have to do this:
+
+```bash
+DEBIAN_FRONTEND=noninteractive apt install -y ./sshportal_x.x.x_xxx.deb
+```
+
+</details>
+
+<details>
+<summary>Show RedHat-based distributions instructions</summary>
+
+Make sure to install `mariadb-server` before if you want to use it as this package is not listed as a hard dependency in the [control file](https://github.com/alterway/sshportal/blob/debian/.goreleaser.yml#L31).
+
+There is no debconf in RedHat distribution so if you want an automatic mariadb setup you need to install `sshportal` with :
+
+```bash
+dnf install -y mariadb-server
+SSHPORTAL_MARIADB_SETUP=true dnf install --setopt=install_weak_deps=False ./sshportal_x.x.x_xxx.rpm
+```
+
+If you want to stick with sqlite, you just have to do this:
+
+```bash
+dnf install -y ./sshportal_x.x.x_xxx.rpm
+```
+
+</details>
+
+<details>
+<summary>Docker instructions</summary>
+
+An [automated build is setup on the Github registry](https://github.com/alterway/sshportal/pkgs/container/sshportal).
+
 ```bash
 # Start a server in background
 # mount `pwd` to persist the sqlite database file
@@ -87,8 +156,38 @@ docker logs -f sshportal
 ```
 
 ### Quick start
+</details>
 
-Create your first host
+---
+
+### Quick start
+
+Get the invite token in stdout or `/var/log/sshportal/audit/audit.log` if installed from a package manager :
+
+```bash
+2023/09/01 15:03:18 info: system migrated
+2023/09/01 15:03:18 info: 'sshportal' user created. Run 'ssh localhost -p 2222 -l invite:6tUguNFYxeOxdx0N' to associate your public key with this account
+2023/09/01 15:03:18 info: SSH Server accepting connections on :2222, idle-timout=0s
+```
+
+3) Make sure you have a ssh key pair and associate your public key to the bastion
+
+```bash
+ssh localhost -p 2222 -l invite:xxxxxxx
+
+Welcome sshportal!
+
+Your key is now associated with the user "sshportal@localhost".
+```
+
+4) Your first user is the admin. To access to the console, connect like a normal server
+
+```bash
+ssh sshportal@localhost -p 2222
+```
+
+
+5) Create your first host
 
 ```console
 config> host create bart@foo.example.org
@@ -96,7 +195,7 @@ config> host create bart@foo.example.org
 config>
 ```
 
-List hosts
+6) List hosts
 
 ```console
 config> host ls
@@ -108,6 +207,7 @@ config>
 ```
 
 Add the `host` key to the server
+7) Add the `host` key to the server
 
 ```console
 config> host ls
@@ -125,14 +225,18 @@ config> key ls
 ssh bart@foo.example.org "$(ssh sshportal@localhost -p 2222 key setup host)"
 ```
 
-Profit
+```console
+ssh bart@foo.example.org "$(ssh sshportal@localhost -p 2222 key setup host)"
+```
+
+8) Profit
 
 ```console
 ssh localhost -p 2222 -l foo
 bart@foo>
 ```
 
-Invite friends
+9) Invite friends
 
 *This command doesn't create a user on the remote server, it only creates an account in the sshportal database.*
 
@@ -147,7 +251,7 @@ Demo gif:
 
 ---
 
-## Features and limitations
+### Features and limitations
 
 * Single autonomous binary (~20Mb) with no runtime dependencies (except glibc)
 * Portable / Cross-platform (regularly tested on linux and OSX/darwin)
@@ -186,13 +290,13 @@ Demo gif:
 
 **(Known) limitations**
 
-* Does not work (yet?) with [`mosh`](https://mosh.org/)
+* Does not work with [`mosh`](https://mosh.org/)
 * It is not possible for a user to access a host with the same name as the user. This is easily circumvented by changing the user name, especially since the most common use cases does not expose it.
 * It is not possible to access a host named `healthcheck` as this is a built-in command.
 
 ---
 
-## Backup / Restore
+### Backup / Restore
 
 sshportal embeds built-in backup/restore methods which basically import/export JSON objects:
 
@@ -218,7 +322,7 @@ cp sshportal.db sshportal.db.bkp
 
 ---
 
-## built-in shell
+### Built-in shell
 
 `sshportal` embeds a configuration CLI.
 
@@ -235,84 +339,11 @@ You can enter in interactive mode using this syntax: `ssh root@portal.example.or
 ![sshportal overview](https://raw.github.com/alterway/sshportal/master/.assets/overview.png)
 ---
 
-## Shell commands
-
-```sh
-# acl management
-acl help
-acl create [-h] [--hostgroup=HOSTGROUP...] [--usergroup=USERGROUP...] [--pattern=<value>] [--comment=<value>] [--action=<value>] [--weight=value]
-acl inspect [-h] ACL...
-acl ls [-h] [--latest] [--quiet]
-acl rm [-h] ACL...
-acl update [-h] [--comment=<value>] [--action=<value>] [--weight=<value>] [--assign-hostgroup=HOSTGROUP...] [--unassign-hostgroup=HOSTGROUP...] [--assign-usergroup=USERGROUP...] [--unassign-usergroup=USERGROUP...] ACL...
-
-# config management
-config help
-config backup [-h] [--indent] [--decrypt]
-config restore [-h] [--confirm] [--decrypt]
-
-# event management
-event help
-event ls [-h] [--latest] [--quiet]
-event inspect [-h] EVENT...
-
-# host management
-host help
-host create [-h] [--name=<value>] [--password=<value>] [--comment=<value>] [--key=KEY] [--group=HOSTGROUP...] [--hop=HOST] [--logging=MODE] <username>[:<password>]@<host>[:<port>]
-host inspect [-h] [--decrypt] HOST...
-host ls [-h] [--latest] [--quiet]
-host rm [-h] HOST...
-host update [-h] [--name=<value>] [--comment=<value>] [--key=KEY] [--assign-group=HOSTGROUP...] [--unassign-group=HOSTGROUP...] [--logging-MODE] [--set-hop=HOST] [--unset-hop] [--reset] HOST...
-
-# hostgroup management
-hostgroup help
-hostgroup create [-h] [--name=<value>] [--comment=<value>]
-hostgroup inspect [-h] HOSTGROUP...
-hostgroup ls [-h] [--latest] [--quiet]
-hostgroup rm [-h] HOSTGROUP...
-
-# key management
-key help
-key create [-h] [--name=<value>] [--type=<value>] [--length=<value>] [--comment=<value>]
-key import [-h] [--name=<value>] [--comment=<value>]
-key inspect [-h] [--decrypt] KEY...
-key ls [-h] [--latest] [--quiet]
-key rm [-h] KEY...
-key setup [-h] KEY
-key show [-h] KEY
-
-# session management
-session help
-session ls [-h] [--latest] [--quiet]
-session inspect [-h] SESSION...
-
-# user management
-user help
-user invite [-h] [--name=<value>] [--comment=<value>] [--group=USERGROUP...] <email>
-user inspect [-h] USER...
-user ls [-h] [--latest] [--quiet]
-user rm [-h] USER...
-user kick [-h] USER
-user ban [-h] USER
-user update [-h] [--name=<value>] [--email=<value>] [--set-admin] [--unset-admin] [--assign-group=USERGROUP...] [--unassign-group=USERGROUP...] USER...
-
-# usergroup management
-usergroup help
-usergroup create [-h] [--name=<value>] [--comment=<value>]
-usergroup inspect [-h] USERGROUP...
-usergroup ls [-h] [--latest] [--quiet]
-usergroup rm [-h] USERGROUP...
-
-# other
-exit [-h]
-help, h
-info [-h]
-version [-h]
-```
+See [Documentation](https://github.com/alterway/sshportal/wiki/Documentation) for the list of shell commands.
 
 ---
 
-## Healthcheck
+### Healthcheck
 
 By default, `sshportal` will return `OK` to anyone sshing using the `healthcheck` user without checking for authentication.
 
@@ -346,12 +377,14 @@ config>
 ---
 
 ## Portal alias (.ssh/config)
+### Portal alias (.ssh/config)
 
 Edit your `~/.ssh/config` file (create it first if needed)
 
 ```ini
 Host portal
   User      root       # or 'sshportal' if you use the packaged binary
+  User      root       # or 'sshportal' if you use the packaged sshportal
   Port      2222       # portal port
   HostName  127.0.0.1  # portal hostname
 ```
@@ -385,6 +418,7 @@ See [examples/mysql](http://github.com/alterway/sshportal/tree/master/examples/m
 ---
 
 ## Under the hood
+### Under the hood
 
 * Docker first (used in dev, tests, by the CI and in production)
 * Backed by (see [dep graph](https://godoc.org/github.com/alterway/sshportal?import-graph&hide=2)):
@@ -405,7 +439,7 @@ See [examples/mysql](http://github.com/alterway/sshportal/tree/master/examples/m
 
 ---
 
-## Testing
+### Testing
 
 [Install golangci-lint](https://golangci-lint.run/usage/install/#local-installation) and run this in project root:
 ```

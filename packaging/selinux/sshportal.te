@@ -1,0 +1,64 @@
+policy_module(sshportal, 1.0.0)
+
+gen_require(
+  type sysctl_net_t;
+  type sysfs_t;
+  type unreserved_port_t;
+)
+
+########################################
+#
+# Declarations
+#
+
+type sshportal_t;
+type sshportal_exec_t;
+init_daemon_domain(sshportal_t, sshportal_exec_t)
+
+permissive sshportal_t;
+
+type sshportal_log_t;
+logging_log_file(sshportal_log_t)
+
+type sshportal_var_lib_t;
+files_type(sshportal_var_lib_t)
+
+########################################
+#
+# sshportal local policy
+#
+allow sshportal_t self:capability { setgid setuid };
+allow sshportal_t self:fifo_file rw_fifo_file_perms;
+allow sshportal_t self:unix_stream_socket create_stream_socket_perms;
+allow sshportal_t self:tcp_socket { listen accept };
+allow sshportal_t sysctl_net_t:dir search;
+allow sshportal_t sysctl_net_t:file { open read };
+allow sshportal_t sysfs_t:file { open read };
+allow sshportal_t unreserved_port_t:tcp_socket name_bind;
+allow sshportal_t var_log_t:lnk_file read;
+
+allow init_t sshportal_log_t:file { create open append setattr };
+allow init_t sshportal_log_t:lnk_file read;
+allow init_t sshportal_log_t:dir { reparent rename add_name };
+allow init_t sshportal_t:process2 nnp_transition;
+allow init_t sshportal_var_lib_t:lnk_file read;
+
+manage_dirs_pattern(sshportal_t, sshportal_log_t, sshportal_log_t)
+manage_files_pattern(sshportal_t, sshportal_log_t, sshportal_log_t)
+manage_lnk_files_pattern(sshportal_t, sshportal_log_t, sshportal_log_t)
+logging_log_filetrans(sshportal_t, sshportal_log_t, { dir file lnk_file })
+
+manage_dirs_pattern(sshportal_t, sshportal_var_lib_t, sshportal_var_lib_t)
+manage_files_pattern(sshportal_t, sshportal_var_lib_t, sshportal_var_lib_t)
+manage_lnk_files_pattern(sshportal_t, sshportal_var_lib_t, sshportal_var_lib_t)
+files_var_lib_filetrans(sshportal_t, sshportal_var_lib_t, { dir file lnk_file })
+
+domain_use_interactive_fds(sshportal_t)
+
+files_read_etc_files(sshportal_t)
+
+auth_use_nsswitch(sshportal_t)
+
+miscfiles_read_localization(sshportal_t)
+
+sysnet_dns_name_resolve(sshportal_t)

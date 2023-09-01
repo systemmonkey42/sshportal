@@ -1,0 +1,5 @@
+/usr/bin/sshportal		--	gen_context(system_u:object_r:sshportal_exec_t,s0)
+
+/var/lib/sshportal(/.*)?		gen_context(system_u:object_r:sshportal_var_lib_t,s0)
+
+/var/log/sshportal(/.*)?		gen_context(system_u:object_r:sshportal_log_t,s0)

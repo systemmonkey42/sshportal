@@ -1,0 +1,9 @@
+[Unit]
+Description=Cleanup of SSHportal session logs
+
+[Service]
+Type=oneshot
+ExecStart=find /var/log/sshportal/session/ -ctime +365 -type f -delete
+
+[Install]
+WantedBy=default.target

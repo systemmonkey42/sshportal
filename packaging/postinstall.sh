@@ -1,7 +1,42 @@
-#!/bin/sh
+#!/bin/sh -e
+
+mkdir -p /etc/systemd/system/sshportal.service.d/
+
+if [ -f /tmp/sshportal_mariadb ]; then
+	SOCKET="$(mysqladmin variables | grep ".sock " | awk '{print $4}')"
+	readonly SOCKET
+
+tee /etc/systemd/system/sshportal.service.d/custom.conf >/dev/null 2>&1 << END
+[Service]
+StateDirectory=
+Environment=SSHPORTAL_DB_DRIVER=mysql
+Environment=SSHPORTAL_DATABASE_URL=sshportal@unix($SOCKET)/sshportal?charset=utf8&parseTime=true&loc=Local
+END
+	rm -f /tmp/sshportal_mariadb
+else
+
+tee /etc/systemd/system/sshportal.service.d/custom.conf >/dev/null 2>&1 << END
+[Service]
+Environment=SSHPORTAL_DB_DRIVER=sqlite3
+Environment=SSHPORTAL_DATABASE_URL=/var/lib/sshportal/sshportal.db
+END
+
+fi
+
+if command -v selinuxenabled >/dev/null 2>&1; then
+	semodule -i /usr/share/selinux/packages/sshportal.pp
+	restorecon -F -R /usr/bin/sshportal
+fi
 
 mkdir -p /var/log/sshportal/audit
-echo "0 1 * * 0 root find /var/log/sshportal/session/ -ctime +365 -type f -delete" > /etc/cron.d/sshportal
 systemctl daemon-reload
-systemctl enable sshportal
-systemctl start sshportal
+
+# LogsDirectory, StateDirectory are created by systemd
+if command -v selinuxenabled >/dev/null 2>&1; then
+	systemctl enable --now sshportal >/dev/null 2>&1 # this will fail because of SELinux on first install
+	restorecon -F -R /var/log/sshportal
+	[ -d /var/lib/sshportal ] && restorecon -F -R /var/lib/sshportal
+fi
+
+systemctl enable --now sshportal
+systemctl enable --now sshportal_clean_session_logs.timer

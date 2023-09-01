@@ -1,0 +1,4 @@
+Template: sshportal_mariadb_database
+Type: boolean
+Description: Use mariadb as database instead of Sqlite?
+Default: false

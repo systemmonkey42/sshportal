@@ -1,0 +1,10 @@
+[Unit]
+Description=Cleanup of SSHportal session logs
+ConditionPathIsDirectory=/var/log/sshportal/session/
+
+[Timer]
+OnCalendar=weekly
+OnUnitActiveSec=1d
+
+[Install]
+WantedBy=timers.target

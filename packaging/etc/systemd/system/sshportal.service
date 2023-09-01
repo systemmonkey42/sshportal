@@ -1,17 +1,15 @@
 [Unit]
 After=ssh.service
+Wants=sshportal_clean_session_logs.timer
 
 [Service]
 Type=exec
 DynamicUser=yes
 User=sshportal
-#Restart=on-failure
-RestartSec=10s
 StandardOutput=append:/var/log/sshportal/audit/audit.log
 LogsDirectory=sshportal
 StateDirectory=sshportal
 Environment=SSHPORTAL_LOGS_LOCATION=/var/log/sshportal/session
-Environment=SSHPORTAL_DATABASE_URL=/var/lib/sshportal/sshportal.db
 ExecStartPre=mkdir -p /var/log/sshportal/audit
 ExecStart=/usr/bin/sshportal server
 ExecStop=/bin/kill -SIGTERM $MAINPID
