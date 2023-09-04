@@ -30,7 +30,6 @@ if [ "$RET" = "true" ] || [ "$SSHPORTAL_MARIADB_SETUP" = "true" ]; then
 	 	exit 2
 	fi
 
-	useradd -rd /nonexistent -s /usr/sbin/nologin sshportal # can't use systemd dynamic user to access the unix socket
 	systemctl enable --now mariadb
     mariadb -e "CREATE DATABASE sshportal CHARACTER SET utf8;" || printf "${BYELLOW}%s %s${NC}\n" "WARNING: sshportal database already exists"
 	mariadb -e "GRANT ALL on sshportal.* to 'sshportal'@'localhost' identified via unix_socket;"

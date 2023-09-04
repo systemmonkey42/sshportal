@@ -30,6 +30,7 @@ nfpms:
 
   dependencies:
     - systemd
+    - libnss-systemd
 
   recommends:
     - sqlite3

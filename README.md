@@ -60,8 +60,8 @@ You will be asked if you want to use `mariadb` instead of `sqlite` (default). Ma
 To install SSHportal with mariadb:
 
 ```bash
-apt install -y mariadb-server
-DEBIAN_FRONTEND=noninteractive SSHPORTAL_MARIADB_SETUP=true apt install --no-install-recommends -y ./sshportal_x.x.x_xxx.deb
+apt install --no-install-recommends -y mariadb-server
+DEBIAN_FRONTEND=noninteractive SSHPORTAL_MARIADB_SETUP=true apt install --no-install-recommends -y mariadb-server ./sshportal_x.x.x_xxx.deb
 ```
 
 If you want to stick with sqlite, you just have to do this:
@@ -80,7 +80,7 @@ Make sure to install `mariadb-server` before if you want to use it as this packa
 There is no debconf in RedHat distribution so if you want an automatic mariadb setup you need to install `sshportal` with :
 
 ```bash
-dnf install -y mariadb-server
+dnf install -y --setopt=install_weak_deps=False mariadb-server
 SSHPORTAL_MARIADB_SETUP=true dnf install --setopt=install_weak_deps=False ./sshportal_x.x.x_xxx.rpm
 ```
 
