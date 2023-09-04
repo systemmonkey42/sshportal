@@ -23,6 +23,9 @@ nfpms:
   vendor: Alterway
   maintainer: security@alterway.fr
   license: Apache 2.0
+  homepage: https://github.com/alterway/sshportal
+  description: |-
+      Transparent SSH bastion written in Go
 
   formats:
     - deb
@@ -40,6 +43,8 @@ nfpms:
 
   provides:
     - sshportal
+
+  priority: optional
 
   bindir: /usr/bin
 
