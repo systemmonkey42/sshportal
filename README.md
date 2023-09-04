@@ -1,6 +1,5 @@
 <div align="center">
 <img src="https://raw.githubusercontent.com/alterway/sshportal/master/.assets/bastion.jpg" width="20%">
-</div>
 
 # sshportal
 
@@ -10,20 +9,11 @@
 
 Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 
+
 ## IMPORTANT NOTE
 **The [original project](https://github.com/moul/sshportal) is no longer being maintained. This fork includes important security fixes, some bugfixes and features but it is on MAINTENANCE mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead.**
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/alterway/sshportal/master/.assets/bastion.jpg" width="45%">
-</p>
-
-![Flow Diagram](https://raw.githubusercontent.com/alterway/sshportal/master/.assets/flow-diagram.png)
-[![License](https://img.shields.io/github/license/alterway/sshportal.svg)](https://github.com/alterway/sshportal/blob/master/LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/alterway/sshportal.svg)](https://github.com/alterway/sshportal/releases)
-
-## IMPORTANT NOTE
-
-**The [original project](https://github.com/moul/sshportal) is no longer being maintained. This fork includes important security fixes, some bugfixes and features but it is on MAINTENANCE mode and only security issues and major bugs will be fixed. You should consider using [Teleport](https://github.com/gravitational/teleport) instead.**
+</div>
 
 ---
 
@@ -49,52 +39,13 @@ Jump host/Jump server without the jump, a.k.a Transparent SSH bastion
 
 ### Installation
 
-Packaged installation is privileged as it comes with a hardened systemd service config.
-
-### Debian-based distributions
-
-1) Get the latest version from https://github.com/alterway/sshportal/releases
-
-```bash
-apt install ./sshportal.deb
-```
-
-This will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a systemd timer for purging session logs. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
-
-
-2) Get the invite token
-
-```bash
-cat /var/log/sshportal/audit/audit.log
-```
-
-3) Make sure you have a ssh key pair and associate your public key to the bastion
-
-```bash
-ssh localhost -p 2222 -l invite:xxxxxxx
-
-Welcome sshportal!
-
-Your key is now associated with the user "sshportal@localhost".
-```
-
-4) Your first user is the admin. To access to the console, connect like a normal server
-
-```bash
-ssh sshportal@localhost -p 2222
-```
-
-### Docker
-
-An [automated build is setup on the Github registry](https://github.com/alterway/sshportal/pkgs/container/sshportal).
-
 Packaged installation (`.deb` & `.rpm`) is privileged as it comes with a hardened systemd service and a SELinux module if you have enfored SELinux on your GNU/Linux distribution.
 
 Get the latest version [here](https://github.com/alterway/sshportal/releases)
 
-**Note :** By default, your package manager will automatically install `sqlite` (recommended dependency)
+**Note :** by default, your package manager will automatically install `sqlite` (recommended dependency)
 
-This installation will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a dedicated cron for session logs. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
+This installation will install sshportal as a systemd service, configure logrotate to keep 1 year of audit logs and add a systemd timer for session logs management. See [`packaging`](https://github.com/alterway/sshportal/tree/master/packaging).
 
 If mariadb is selected during the install, it will also automatically create the `sshportal` database if it doesn't exist.
 
@@ -104,7 +55,7 @@ If mariadb is selected during the install, it will also automatically create the
 ```bash
 apt install ./sshportal_x.x.x_xxx.deb
 ```
-You will be asked if you want to use `mariadb` instead of `sqlite` (default). Make sure to install `mariadb-server` before as the package is not listed as a hard dependency in the [control file](https://github.com/alterway/sshportal/blob/debian/.goreleaser.yml#L31).
+You will be asked if you want to use `mariadb` instead of `sqlite` (default). Make sure to install `mariadb-server` before as the package is not listed as a hard dependency in the [control file](https://github.com/alterway/sshportal/blob/master/.goreleaser.yml#L31).
 
 To install SSHportal with mariadb:
 
@@ -124,7 +75,7 @@ DEBIAN_FRONTEND=noninteractive apt install -y ./sshportal_x.x.x_xxx.deb
 <details>
 <summary>Show RedHat-based distributions instructions</summary>
 
-Make sure to install `mariadb-server` before if you want to use it as this package is not listed as a hard dependency in the [control file](https://github.com/alterway/sshportal/blob/debian/.goreleaser.yml#L31).
+Make sure to install `mariadb-server` before if you want to use it as this package is not listed as a hard dependency in the [control file](https://github.com/alterway/sshportal/blob/master/.goreleaser.yml#L31).
 
 There is no debconf in RedHat distribution so if you want an automatic mariadb setup you need to install `sshportal` with :
 
@@ -155,14 +106,13 @@ docker run -p 2222:2222 -d --name=sshportal -v "$(pwd):$(pwd)" -w "$(pwd)" ghcr.
 docker logs -f sshportal
 ```
 
-### Quick start
 </details>
 
 ---
 
 ### Quick start
 
-Get the invite token in stdout or `/var/log/sshportal/audit/audit.log` if installed from a package manager :
+1) Get the invite token in stdout or `/var/log/sshportal/audit/audit.log` if installed from a package manager :
 
 ```bash
 2023/09/01 15:03:18 info: system migrated
@@ -170,9 +120,9 @@ Get the invite token in stdout or `/var/log/sshportal/audit/audit.log` if instal
 2023/09/01 15:03:18 info: SSH Server accepting connections on :2222, idle-timout=0s
 ```
 
-3) Make sure you have a ssh key pair and associate your public key to the bastion
+2) Make sure you have a ssh key pair and associate your public key to the bastion
 
-```bash
+```console
 ssh localhost -p 2222 -l invite:xxxxxxx
 
 Welcome sshportal!
@@ -180,14 +130,14 @@ Welcome sshportal!
 Your key is now associated with the user "sshportal@localhost".
 ```
 
-4) Your first user is the admin. To access to the console, connect like a normal server
+3) Your first user is the admin. To access to the console, connect like a normal server
 
-```bash
+```console
 ssh sshportal@localhost -p 2222
 ```
 
 
-5) Create your first host
+4) Create your first host
 
 ```console
 config> host create bart@foo.example.org
@@ -195,7 +145,7 @@ config> host create bart@foo.example.org
 config>
 ```
 
-6) List hosts
+5) List hosts
 
 ```console
 config> host ls
@@ -206,8 +156,7 @@ Total: 1 hosts.
 config>
 ```
 
-Add the `host` key to the server
-7) Add the `host` key to the server
+6) Add the `host` key to the server
 
 ```console
 config> host ls
@@ -229,14 +178,14 @@ ssh bart@foo.example.org "$(ssh sshportal@localhost -p 2222 key setup host)"
 ssh bart@foo.example.org "$(ssh sshportal@localhost -p 2222 key setup host)"
 ```
 
-8) Profit
+7) Profit
 
 ```console
 ssh localhost -p 2222 -l foo
 bart@foo>
 ```
 
-9) Invite friends
+8) Invite friends
 
 *This command doesn't create a user on the remote server, it only creates an account in the sshportal database.*
 
@@ -376,7 +325,6 @@ config>
 
 ---
 
-## Portal alias (.ssh/config)
 ### Portal alias (.ssh/config)
 
 Edit your `~/.ssh/config` file (create it first if needed)
@@ -417,7 +365,6 @@ See [examples/mysql](http://github.com/alterway/sshportal/tree/master/examples/m
 
 ---
 
-## Under the hood
 ### Under the hood
 
 * Docker first (used in dev, tests, by the CI and in production)
@@ -445,12 +392,12 @@ See [examples/mysql](http://github.com/alterway/sshportal/tree/master/examples/m
 ```
 golangci-lint run
 ```
----
+
 Perform integration tests
 ```
 cd ./examples/integration && make
 ```
----
+
 Perform unit tests
 ```
 go test
