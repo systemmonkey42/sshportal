@@ -2105,8 +2105,8 @@ GLOBAL OPTIONS:
 				{
 					Name:        "create",
 					ArgsUsage:   "<user ID or email>",
-					Usage:       "Creates a new userkey",
-					Description: "$> userkey create bob\n   $> user create --name=mykey bob",
+					Usage:       "Creates a new userkey for an existing user",
+					Description: "$> userkey create bob",
 					Flags: []cli.Flag{
 						cli.StringFlag{Name: "comment", Usage: "Adds a comment"},
 					},
@@ -2121,7 +2121,7 @@ GLOBAL OPTIONS:
 
 						var user dbmodels.User
 						if err := dbmodels.UsersByIdentifiers(db, c.Args()).First(&user).Error; err != nil {
-							return err
+							return fmt.Errorf("User %s does not exist ", c.Args().First())
 						}
 
 						var reader *bufio.Reader
