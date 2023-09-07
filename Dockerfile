@@ -6,7 +6,7 @@ RUN             go build -ldflags="-X main.GitSha=$(git rev-parse --short HEAD) 
 
 # minimal runtime
 # https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md
-FROM            gcr.io/distroless/static-debian11:latest
+FROM            gcr.io/distroless/static-debian12:latest
 COPY            --from=builder /go/bin/sshportal /bin/sshportal
 ENTRYPOINT      ["/bin/sshportal"]
 CMD             ["server"]
