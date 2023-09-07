@@ -378,8 +378,7 @@ func PublicKeyAuthHandler(db *gorm.DB, logsLocation, aclCheckCmd, aesKey, dbDriv
 				db.Create(&actx.userKey)
 
 				// token is only usable once
-				actx.user.InviteToken = ""
-				db.Model(&actx.user).Updates(&actx.user)
+				db.Model(&actx.user).Update("invite_token", "")
 
 				actx.message = fmt.Sprintf("Welcome %s!\n\nYour key is now associated with the user %q.\n", actx.user.Name, actx.user.Email)
 			} else {
