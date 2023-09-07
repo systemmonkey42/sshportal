@@ -1765,7 +1765,7 @@ GLOBAL OPTIONS:
 						}
 
 						table := tablewriter.NewWriter(s)
-						table.SetHeader([]string{"ID", "Name", "Email", "Roles", "Keys", "Groups", "Updated", "Created", "Comment"})
+						table.SetHeader([]string{"ID", "Name", "Email", "Roles", "Keys", "Groups", "Updated", "Created", "Comment", "Invite Token"})
 						table.SetBorder(false)
 						table.SetCaption(true, fmt.Sprintf("Total: %d users.", len(users)))
 						for _, user := range users {
@@ -1787,6 +1787,7 @@ GLOBAL OPTIONS:
 								humanize.Time(user.UpdatedAt),
 								humanize.Time(user.CreatedAt),
 								user.Comment,
+								user.InviteToken,
 							})
 						}
 						table.Render()
@@ -1814,7 +1815,7 @@ GLOBAL OPTIONS:
 					Flags: []cli.Flag{
 						cli.StringFlag{Name: "name, n", Usage: "Renames the user"},
 						cli.StringFlag{Name: "email, e", Usage: "Updates the email"},
-						cli.StringFlag{Name: "invite_token, i", Usage: "Updates the invite token"},
+						cli.BoolFlag{Name: "gen_invite, G", Usage: "Generate a new invite token"},
 						cli.BoolFlag{Name: "remove_invite, R", Usage: "Remove invite token"},
 						cli.StringSliceFlag{Name: "assign-role, r", Usage: "Assign the user to new `USERROLES`"},
 						cli.StringSliceFlag{Name: "unassign-role", Usage: "Unassign the user from `USERROLES`"},
@@ -1848,7 +1849,7 @@ GLOBAL OPTIONS:
 						for _, user := range users {
 							model := tx.Model(user)
 							// simple fields
-							for _, fieldname := range []string{"name", "email", "comment", "invite_token"} {
+							for _, fieldname := range []string{"name", "email", "comment"} {
 								if c.String(fieldname) != "" {
 									if err := model.Update(fieldname, c.String(fieldname)).Error; err != nil {
 										tx.Rollback()
@@ -1856,9 +1857,22 @@ GLOBAL OPTIONS:
 									}
 								}
 							}
-							// invite remove
+
+							// remove invite token
 							if c.Bool("remove_invite") {
 								if err := model.Update("invite_token", "").Error; err != nil {
+									tx.Rollback()
+									return err
+								}
+							}
+
+							// generate an new invite token
+							if c.Bool("gen_invite") {
+								inviteToken, err := randStringBytes(16)
+								if err != nil {
+									return err
+								}
+								if err := model.Update("invite_token", inviteToken).Error; err != nil {
 									tx.Rollback()
 									return err
 								}
