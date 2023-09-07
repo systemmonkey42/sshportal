@@ -2231,7 +2231,7 @@ GLOBAL OPTIONS:
 						}
 
 						table := tablewriter.NewWriter(s)
-						table.SetHeader([]string{"ID", "User", "Updated", "Created", "Comment"})
+						table.SetHeader([]string{"ID", "User", "Updated", "Created", "Comment", "Fingerprint"})
 						table.SetBorder(false)
 						table.SetCaption(true, fmt.Sprintf("Total: %d userkeys.", len(userKeys)))
 						for _, userkey := range userKeys {
@@ -2239,6 +2239,12 @@ GLOBAL OPTIONS:
 							if userkey.User != nil {
 								email = userkey.User.Email
 							}
+
+							pubUserkey, err := gossh.ParsePublicKey(userkey.Key)
+							if err != nil {
+								return err
+							}
+
 							table.Append([]string{
 								fmt.Sprintf("%d", userkey.ID),
 								email,
@@ -2246,6 +2252,7 @@ GLOBAL OPTIONS:
 								humanize.Time(userkey.UpdatedAt),
 								humanize.Time(userkey.CreatedAt),
 								userkey.Comment,
+								gossh.FingerprintSHA256(pubUserkey),
 							})
 						}
 						table.Render()
