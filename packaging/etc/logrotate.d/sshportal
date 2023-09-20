@@ -1,7 +1,7 @@
 /var/log/sshportal/audit/audit.log {
-  daily
+  weekly
   missingok
-  rotate 365
+  rotate 52
   compress
   notifempty
   copytruncate
