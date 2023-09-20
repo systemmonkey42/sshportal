@@ -4,6 +4,7 @@
   rotate 365
   compress
   notifempty
+  copytruncate
   dateext
   dateformat -%Y-%m-%d
   postrotate
