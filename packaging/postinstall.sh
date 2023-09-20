@@ -40,3 +40,6 @@ fi
 
 systemctl enable --now sshportal
 systemctl enable --now sshportal_clean_session_logs.timer
+
+systemctl restart sshportal
+systemctl restart sshportal_clean_session_logs.timer
