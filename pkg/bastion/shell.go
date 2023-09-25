@@ -17,7 +17,6 @@ import (
 	"strings"
 	"time"
 
-	"gorm.io/gorm"
 	shlex "github.com/anmitsu/go-shlex"
 	"github.com/asaskevich/govalidator"
 	"github.com/docker/docker/pkg/namesgenerator"
@@ -28,6 +27,7 @@ import (
 	"github.com/urfave/cli"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal" // nolint:staticcheck
+	"gorm.io/gorm"
 	"moul.io/sshportal/pkg/crypto"
 	"moul.io/sshportal/pkg/dbmodels"
 	"moul.io/sshportal/pkg/utils"
@@ -82,17 +82,17 @@ GLOBAL OPTIONS:
 		myself = &actx.user
 		db     = actx.db
 	)
-	
+
 	sess := dbmodels.Session{
-				UserID: actx.user.ID,
-				HostID: 0,
-				Status: string(dbmodels.SessionStatusActive),
+		UserID: actx.user.ID,
+		HostID: 0,
+		Status: string(dbmodels.SessionStatusActive),
 	}
 	if err := actx.db.Create(&sess).Error; err != nil {
 		log.Println(err)
 		return cli.NewExitError(err.Error(), 1)
 	}
-	
+
 	go func(s ssh.Session, dbConn *gorm.DB, sessionID uint) {
 		for {
 			sess := dbmodels.Session{Model: gorm.Model{ID: sessionID}, Status: string(dbmodels.SessionStatusActive)}
@@ -1928,9 +1928,9 @@ GLOBAL OPTIONS:
 								tx.Rollback()
 								return err
 							}
-							
+
 							groups := tx.Model(user).Association("Groups")
-							
+
 							if err := groups.Append(&appendGroups); err != nil {
 								tx.Rollback()
 								return err
@@ -1958,7 +1958,7 @@ GLOBAL OPTIONS:
 								}
 							}
 							if len(deleteRoles) > 0 {
-								if err := roles.Delete(deleteRoles); err != nil {
+								if err := model.Association("Roles").Delete(&deleteRoles); err != nil {
 									tx.Rollback()
 									return err
 								}
@@ -2496,7 +2496,7 @@ GLOBAL OPTIONS:
 			return s.Exit(1)
 		}
 	}
-	
+
 	now := time.Now()
 	sessUpdate := dbmodels.Session{
 		Status:    string(dbmodels.SessionStatusClosed),

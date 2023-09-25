@@ -140,7 +140,7 @@ func ChannelHandler(srv *ssh.Server, conn *gossh.ServerConn, newChan gossh.NewCh
 					// FIXME: force close all channels
 					_ = ch.Close()
 					return
-				}				
+				}
 				sessionConfigs = append([]sessionConfig{{
 					Addr:         currentHost.DialAddr(),
 					ClientConfig: clientConfig,

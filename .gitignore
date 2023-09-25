@@ -10,3 +10,5 @@ dist/
 /data
 sshportal.history
 .idea
+.git-sha.txt
+.git-tag.txt

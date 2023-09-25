@@ -4,22 +4,30 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
+
+	_ "embed"
 
 	"github.com/urfave/cli"
 )
 
+//go:generate bash -c "git describe --tag --abbrev=8 --dirty > .git-tag.txt"
+//go:generate bash -c "git log -1 --abbrev=8 --format=\"%h\" HEAD > .git-sha.txt"
+
 var (
 	// GitTag will be overwritten automatically by the build system
-	GitTag = "n/a"
+	//go:embed .git-tag.txt
+	GitTag string
 	// GitSha will be overwritten automatically by the build system
-	GitSha = "n/a"
+	//go:embed .git-sha.txt
+	GitSha string
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Author = "Manfred Touron"
-	app.Version = GitTag + " (" + GitSha + ")"
+	app.Version = strings.Trim(GitTag, " \n") + " (" + strings.Trim(GitSha, " \n") + ")"
 	app.Email = "https://moul.io/sshportal"
 	app.Commands = []cli.Command{
 		{
