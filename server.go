@@ -6,6 +6,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -86,7 +87,7 @@ func server(c *serverConfig) (err error) {
 
 	db, _ := dbConnect(c, &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
-		Logger: logger.Default.LogMode(logger.Silent),
+		Logger:                                   logger.Default.LogMode(logger.Silent),
 	})
 	sqlDB, err := db.DB()
 
@@ -114,8 +115,14 @@ func server(c *serverConfig) (err error) {
 
 	// configure server
 	srv := &ssh.Server{
-		Addr:    c.bindAddr,
-		Handler: func(s ssh.Session) { bastion.ShellHandler(s, GitTag, GitSha, GitTag) }, // ssh.Server.Handler is the handler for the DefaultSessionHandler
+		Addr: c.bindAddr,
+		Handler: func(s ssh.Session) {
+			bastion.ShellHandler(s,
+				strings.Trim(GitTag, " \n"),
+				strings.Trim(GitSha, " \n"),
+				strings.Trim(GitTag, " \n"),
+			)
+		}, // ssh.Server.Handler is the handler for the DefaultSessionHandler
 		Version: "sshportal",
 		ChannelHandlers: map[string]ssh.ChannelHandler{
 			"default": bastion.ChannelHandler,
