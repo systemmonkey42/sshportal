@@ -22,7 +22,7 @@ jobs:
         id: release
         run: |
           echo "RELEASE=false" >> $GITHUB_OUTPUT
-          git diff $(git describe --tags --abbrev=0) HEAD --stat | grep -q "changed" || exit 0
+          git log $(git describe --tags --abbrev=0)..HEAD --oneline | grep -Evq "(ci:|doc:|gh-actions)" || exit 0
           new_tag=$(git describe --tags --abbrev=0 | awk -F. '{OFS="."; $NF+=1; print $0}')
           git tag "$new_tag" -f
           git push -f origin tag "$new_tag"
