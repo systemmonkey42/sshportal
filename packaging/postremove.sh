@@ -1,6 +1,8 @@
 #!/bin/sh -e
 # shellcheck source=/dev/null
 
+[ "$1" != "remove" ] && exit 0 # run this script only on install
+
 if grep -q "debian" /etc/os-release; then
 	. /usr/share/debconf/confmodule
 	db_purge
@@ -17,4 +19,3 @@ rm -f /etc/logrotate.d/sshportal || true
 grep -q sshportal /etc/passwd && userdel sshportal
 systemctl daemon-reload
 systemctl reset-failed
-
