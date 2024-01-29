@@ -10,7 +10,6 @@ import (
 
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/errors"
-	"github.com/sabban/bastion/pkg/logchannel"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -145,7 +144,7 @@ func pipe(lreqs, rreqs <-chan *gossh.Request, lch, rch gossh.Channel, sessConfig
 	if channeltype == "session" {
 		switch sessConfig.LoggingMode {
 		case "input":
-			wrappedrch := logchannel.New(rch, logWriter)
+			wrappedrch := NewLogChannel(rch, logWriter)
 			go func(quit chan string) {
 				_, _ = io.Copy(lch, rch)
 				quit <- "rch"
@@ -155,7 +154,7 @@ func pipe(lreqs, rreqs <-chan *gossh.Request, lch, rch gossh.Channel, sessConfig
 				quit <- "lch"
 			}(quit)
 		default: // everything, disabled
-			wrappedlch := logchannel.New(lch, logWriter)
+			wrappedlch := NewLogChannel(lch, logWriter)
 			go func(quit chan string) {
 				_, _ = io.Copy(wrappedlch, rch)
 				quit <- "rch"
@@ -188,7 +187,7 @@ func pipe(lreqs, rreqs <-chan *gossh.Request, lch, rch gossh.Channel, sessConfig
 		for req := range lreqs {
 			b, err := rch.SendRequest(req.Type, req.WantReply, req.Payload)
 			if req.Type == "exec" {
-				wrappedlch := logchannel.New(lch, logWriter)
+				wrappedlch := NewLogChannel(lch, logWriter)
 				req.Payload = append(req.Payload, []byte("\n")...)
 				if _, err := wrappedlch.LogWrite(req.Payload); err != nil {
 					log.Printf("failed to write log: %v", err)
