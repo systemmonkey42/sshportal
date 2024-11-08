@@ -21,12 +21,12 @@ jobs:
       - name: Force update latest tag if there is changes
         id: release
         run: |
-          echo "RELEASE=false" >> $GITHUB_OUTPUT
-          git log $(git describe --tags --abbrev=0)..HEAD --oneline | grep -Evq "(ci:|doc:|gh-actions)" || exit 0
+          echo "RELEASE=false" >> "$GITHUB_OUTPUT"
+          git log "$(git describe --tags --abbrev=0)"..HEAD --oneline | grep -Evq "(ci:|doc:|gh-actions)" || exit 0
           new_tag=$(git describe --tags --abbrev=0 | awk -F. '{OFS="."; $NF+=1; print $0}')
           git tag "$new_tag" -f
           git push -f origin tag "$new_tag"
-          echo "RELEASE=true" >> $GITHUB_OUTPUT
+          echo "RELEASE=true" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   goreleaser:
