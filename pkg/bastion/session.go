@@ -12,7 +12,6 @@ import (
 
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/errors"
-	"github.com/sabban/bastion/pkg/logchannel"
 	gossh "golang.org/x/crypto/ssh"
 	"moul.io/sshportal/pkg/crypto"
 )
